@@ -1,0 +1,86 @@
+<!-- views/index.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/styles/style.css">
+  <title>Agenda de Contactos</title>
+</head>
+<body>
+  <div class="container">
+    <h1>Agenda de Contactos</h1>
+    
+    <ul class="contact-list" id="contact-list">
+      <!-- La lista de contactos se cargará dinámicamente aquí -->
+    </ul>
+
+    <div class="contact-form">
+      <h2>Agregar Nuevo Contacto</h2>
+      <label for="nombre">Nombre:</label>
+      <input type="text" id="nombre" name="nombre" required>
+
+      <label for="telefono">Teléfono:</label>
+      <input type="text" id="telefono" name="telefono" required>
+
+      <button onclick="agregarContacto()">Agregar Contacto</button>
+    </div>
+  </div>
+
+  <script>
+    // Función para agregar un nuevo contacto
+    async function agregarContacto() {
+      const nombre = document.getElementById('nombre').value;
+      const telefono = document.getElementById('telefono').value;
+
+      try {
+        // Realizar la solicitud POST para almacenar el nuevo contacto
+        const response = await fetch('/contactos', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nombre, telefono })
+        });
+
+        const resultado = await response.json();
+        alert(resultado.mensaje);
+
+        // Limpiar los campos y volver a cargar la lista de contactos
+        document.getElementById('nombre').value = '';
+        document.getElementById('telefono').value = '';
+        cargarContactos();
+      } catch (error) {
+        console.error(error);
+        alert('Error al agregar el contacto');
+      }
+    }
+
+    // Función para cargar la lista de contactos
+    async function cargarContactos() {
+      try {
+        // Realizar la solicitud GET para obtener la lista de contactos
+        const response = await fetch('/contactos');
+        const contactos = await response.json();
+
+        // Construir la lista de contactos en HTML
+        const contactList = document.getElementById('contact-list');
+        contactList.innerHTML = '';
+
+        contactos.forEach(contacto => {
+          const listItem = document.createElement('li');
+          listItem.className = 'contact-item';
+          listItem.innerHTML = `<strong>${contacto.nombre}</strong>: ${contacto.telefono}`;
+          contactList.appendChild(listItem);
+        });
+      } catch (error) {
+        console.error(error);
+        alert('Error al cargar la lista de contactos');
+      }
+    }
+
+    // Cargar la lista de contactos al cargar la página
+    cargarContactos();
+  </script>
+</body>
+</html>
